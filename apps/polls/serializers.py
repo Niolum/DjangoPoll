@@ -32,13 +32,27 @@ class PollListSerializer(serializers.ModelSerializer):
 
 
 class PollDetailSerializer(serializers.ModelSerializer):
-    first_question = serializers.SerializerMethodField()
+    current_question = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Poll
-        fields = ['id', 'name', 'first_question']
+        fields = ['id', 'name', 'current_question', 'status']
 
     @extend_schema_field(QuestionSerializer)
-    def get_first_question(self, obj):
-        data = QuestionSerializer(Question.objects.get(poll=obj, parent=None)).data
+    def get_current_question(self, obj):
+        question = self.context['current_question']
+        if question:
+            data = QuestionSerializer(question).data
+        else:
+            data = None
+        return data
+    
+    @extend_schema_field(str)
+    def get_status(self, obj):
+        question = self.context['current_question']
+        if question:
+            data = 'START'
+        else:
+            data = 'OVER'
         return data

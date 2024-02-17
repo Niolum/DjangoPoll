@@ -14,7 +14,7 @@ urlpatterns = [
     path('', PollListAPIView.as_view(), name='poll_list'),
     path('<int:poll_id>/', PollDetailAPIView.as_view(), name='poll_detail'),
     path(
-        'answer_question/<int:answer_id>/',
+        'answer_question/<int:poll_id>/<int:answer_id>/',
         AnswerQuestionAPIView.as_view(),
         name='answer_question'
     )

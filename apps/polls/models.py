@@ -2,6 +2,8 @@ from django.db import models
 from django.forms import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
 
+from apps.users.models import User
+
 
 class Poll(models.Model):
     name = models.CharField(verbose_name='Poll', max_length=64)
@@ -15,6 +17,24 @@ class Poll(models.Model):
 
     def __str__(self):
         return f"{self.id} {self.name}"
+
+
+class UserPoll(models.Model):
+    STATUS_CHOICES = (
+        ('START', 'Start'),
+        ('OVER', 'Over')
+    )
+
+    user = models.ForeignKey(User,  verbose_name='User', on_delete=models.CASCADE)
+    poll = models.ForeignKey(Poll, verbose_name='Poll', on_delete=models.CASCADE)
+    status = models.CharField(verbose_name='Status', choices=STATUS_CHOICES, default='START')
+
+    class Meta:
+        verbose_name = 'User poll'
+        verbose_name_plural = 'User polls'
+    
+    def __str__(self):
+        return f'{self.id} {self.poll} {self.user} {self.status}'
 
 
 class Question(MPTTModel):
@@ -73,3 +93,25 @@ class Answer(models.Model):
     class Meta:
         verbose_name = 'Answer'
         verbose_name_plural = 'Answers'
+
+    def __str__(self):
+        return self.text
+
+
+class UserAnswer(models.Model):
+    user = models.ForeignKey(User,  verbose_name='User', on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, verbose_name='Answer', on_delete=models.CASCADE)
+    user_poll = models.ForeignKey(
+        UserPoll,
+        verbose_name='User poll',
+        on_delete=models.CASCADE,
+        related_name='user_answers'
+    )
+    created_at = models.DateTimeField(verbose_name='Answer time', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'User answer'
+        verbose_name_plural = 'User answers'
+    
+    def __str__(self):
+        return f'{self.id} {self.answer} {self.user}'
