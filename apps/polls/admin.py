@@ -8,6 +8,7 @@ from apps.polls.models import Poll, Question, Answer
 class AnswerNestedInline(NestedStackedInline):
     model = Answer
     extra = 0
+    fk_name = 'question'
 
 
 class QuestionInline(NestedStackedInline):
@@ -18,20 +19,24 @@ class QuestionInline(NestedStackedInline):
 
 class PollAdmin(NestedModelAdmin):
     list_display = ['id', 'name', 'count_questions']
-    inlines = [
-        QuestionInline
-    ]
+    inlines = [QuestionInline]
+
 
 class AnswerInline(admin.TabularInline):
     model = Answer
+    extra = 0
+    fk_name = 'question'
+
+
+class AnswerOnPreviousQuestionInline(admin.TabularInline):
+    model = Answer
+    fk_name = 'next_question'
+
 
 class QuestionAdmin(DjangoMpttAdmin):
-    prepopulated_fields = {"text": ["text"]}
     mptt_level_indent = 20
     list_display = ['id', 'text']
-    inlines = [
-        AnswerInline
-    ]
+    inlines = [AnswerInline, AnswerOnPreviousQuestionInline]
 
 
 class AnswerAdmin(admin.ModelAdmin):
