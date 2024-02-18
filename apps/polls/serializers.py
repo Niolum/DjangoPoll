@@ -56,3 +56,9 @@ class PollDetailSerializer(serializers.ModelSerializer):
         else:
             data = 'OVER'
         return data
+
+
+class PollStatisticSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    count_poll_completers = serializers.IntegerField()
+    count_poll_non_completers = serializers.IntegerField()

@@ -3,7 +3,8 @@ from django.urls import path
 from apps.polls.views import (
     PollListAPIView,
     PollDetailAPIView,
-    AnswerQuestionAPIView
+    AnswerQuestionAPIView,
+    PollStatisticAPIView
 )
 
 
@@ -17,5 +18,6 @@ urlpatterns = [
         'answer_question/<int:poll_id>/<int:answer_id>/',
         AnswerQuestionAPIView.as_view(),
         name='answer_question'
-    )
+    ),
+    path('poll_statistic/<int:poll_id>/', PollStatisticAPIView.as_view(), name='poll_statistic')
 ]

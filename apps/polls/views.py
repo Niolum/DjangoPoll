@@ -1,9 +1,15 @@
+from django.db import connection
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from apps.polls.serializers import PollListSerializer, PollDetailSerializer, QuestionSerializer
+from apps.polls.serializers import (
+    PollListSerializer,
+    PollDetailSerializer,
+    QuestionSerializer,
+    PollStatisticSerializer
+)
 from apps.polls.models import Poll, Answer, UserPoll, Question, UserAnswer
 
 
@@ -74,3 +80,33 @@ class AnswerQuestionAPIView(APIView):
             {'message': 'Poll is over'},
             status=status.HTTP_200_OK
         )
+
+
+class PollStatisticAPIView(APIView):
+    serializer_class =PollStatisticSerializer
+
+    def get(self, request, poll_id: int):
+        with connection.cursor() as cursor:
+            status_over = 'OVER'
+            status_start = 'START'
+            query = f'''SELECT COUNT(id) AS COUNT,
+                        (SELECT COUNT(status)
+                            FROM polls_userpoll
+                            WHERE poll_id = {poll_id} AND status LIKE '{status_over}') AS over,
+                        (SELECT COUNT(status)
+                            FROM polls_userpoll
+                            WHERE poll_id = {poll_id} AND status LIKE '{status_start}') AS start
+                        FROM polls_userpoll WHERE poll_id = {poll_id}'''
+
+            cursor.execute(query)
+            row = cursor.fetchone()
+        
+        count, over, start = row
+        data = {
+            'total': count,
+            'count_poll_completers': over,
+            'count_poll_non_completers': start
+        }
+        serializer = self.serializer_class(data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
