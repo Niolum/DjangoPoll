@@ -49,7 +49,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     "rest_framework_simplejwt.token_blacklist",
     'drf_spectacular',
+    'mptt',
+    'django_mptt_admin',
+    'nested_inline',
     'apps.users.apps.UsersConfig',
+    'apps.polls.apps.PollsConfig'
 
 ]
 
