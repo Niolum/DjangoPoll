@@ -8,7 +8,8 @@ from apps.polls.serializers import (
     PollListSerializer,
     PollDetailSerializer,
     QuestionSerializer,
-    PollStatisticSerializer
+    PollStatisticSerializer,
+    QuestionStatisticSerializer
 )
 from apps.polls.models import Poll, Answer, UserPoll, Question, UserAnswer
 
@@ -83,9 +84,15 @@ class AnswerQuestionAPIView(APIView):
 
 
 class PollStatisticAPIView(APIView):
-    serializer_class =PollStatisticSerializer
+    serializer_class = PollStatisticSerializer
 
-    def get(self, request, poll_id: int):
+    def get(self, request, poll_id: int) -> Response:
+        if not Poll.objects.filter(id=poll_id).exists():
+            return Response(
+                {'error': 'Poll not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         with connection.cursor() as cursor:
             status_over = 'OVER'
             status_start = 'START'
@@ -107,6 +114,54 @@ class PollStatisticAPIView(APIView):
             'count_poll_completers': over,
             'count_poll_non_completers': start
         }
+        serializer = self.serializer_class(data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class QuestionStatisticAPIView(APIView):
+    serializer_class = QuestionStatisticSerializer
+
+    def get(self, request, question_id: int) -> Response:
+        if not Question.objects.filter(id=question_id).exists():
+            return Response(
+                {'error': 'Question not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        count_user_poll = None
+        with connection.cursor() as cursor:
+            query = f'''SELECT COUNT(id)
+                            FROM polls_userpoll
+                            WHERE poll_id = 
+                                (SELECT poll_id
+                                    FROM polls_question
+                                    WHERE id = {question_id})'''
+            
+            cursor.execute(query)
+            row = cursor.fetchone()
+            count_user_poll = row[0]
+
+            query = f'''SELECT COUNT(answer_id), polls_answer.id FROM polls_useranswer AS user_answer
+                            RIGHT OUTER JOIN polls_answer ON (user_answer.answer_id = polls_answer.id)
+                            WHERE polls_answer.question_id={question_id}
+                            GROUP BY polls_answer.id'''
+            cursor.execute(query)
+            row = cursor.fetchall()
+            print(row)
+
+        data = {
+            'count_user_poll': count_user_poll,
+            'statistic': []
+        }
+
+        for result in row:
+            statistic = {
+                'answer_id': result[1],
+                'count_answer': result[0]
+            }
+            data['statistic'].append(statistic)
+
         serializer = self.serializer_class(data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

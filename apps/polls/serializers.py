@@ -62,3 +62,13 @@ class PollStatisticSerializer(serializers.Serializer):
     total = serializers.IntegerField()
     count_poll_completers = serializers.IntegerField()
     count_poll_non_completers = serializers.IntegerField()
+
+
+class AnswerStatisticSerializer(serializers.Serializer):
+    answer_id = serializers.IntegerField()
+    count_answer = serializers.IntegerField()
+
+
+class QuestionStatisticSerializer(serializers.Serializer):
+    count_user_poll = serializers.IntegerField()
+    statistic = AnswerStatisticSerializer(many=True)

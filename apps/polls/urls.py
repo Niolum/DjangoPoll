@@ -4,7 +4,8 @@ from apps.polls.views import (
     PollListAPIView,
     PollDetailAPIView,
     AnswerQuestionAPIView,
-    PollStatisticAPIView
+    PollStatisticAPIView,
+    QuestionStatisticAPIView
 )
 
 
@@ -19,5 +20,10 @@ urlpatterns = [
         AnswerQuestionAPIView.as_view(),
         name='answer_question'
     ),
-    path('poll_statistic/<int:poll_id>/', PollStatisticAPIView.as_view(), name='poll_statistic')
+    path('poll_statistic/<int:poll_id>/', PollStatisticAPIView.as_view(), name='poll_statistic'),
+    path(
+        'question_statistic/<int:question_id>/',
+        QuestionStatisticAPIView.as_view(),
+        name='question_statistic'
+    )
 ]
