@@ -23,7 +23,7 @@ class RegistryUserView(CreateAPIView):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data['response'] = True
+            data['response'] = 'User has been registered'
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             data = serializer.errors
@@ -39,7 +39,7 @@ class UserLoginAPIView(GenericAPIView):
         if not serializer.is_valid():
             return Response(
                 {'error': 'Incorrect Credentials'},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_403_FORBIDDEN
             )
         user = serializer.validated_data
         serializer = UserSerializer(user)
