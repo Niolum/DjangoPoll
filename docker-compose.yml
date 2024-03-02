@@ -23,7 +23,7 @@ services:
              gunicorn poll.wsgi:application --bind 0.0.0.0:8005 --access-logfile -"
     volumes:
       - static_value:/djangopoll/static/
-      - ./media:/djangopoll/media/
+      - media_value:/djangopoll/media/
     restart: always
     ports:
       - "8005:8005"
